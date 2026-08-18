@@ -18,13 +18,10 @@ jobs:
       matrix:
         include:
           - os: macos-latest
-            script: dist:mac
             artifact: mac
           - os: windows-latest
-            script: dist:win
             artifact: win
           - os: ubuntu-latest
-            script: dist:linux
             artifact: linux
     runs-on: ${{ matrix.os }}
 
@@ -33,18 +30,17 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # electron 43.4.0 要求 Node >= 22.12.0
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build (${{ matrix.artifact }})
-        run: npm run ${{ matrix.script }}
-        env:
-          # electron-builder 在 CI 上可能需要该变量；
-          # 若已有缓存目录习惯可保持默认，无需改动。
-          ELECTRON_BUILDER_CACHE: ${{ runner.temp }}/electron-builder-cache
+        # --publish never：关闭 electron-builder 对 git tag 的隐式发布，
+        # 发布统一由下方 softprops 步骤完成，避免重复上传资产冲突。
+        run: npx electron-builder --${{ matrix.artifact }} --publish never
 
       - name: List artifacts
         run: ls -lh release/
