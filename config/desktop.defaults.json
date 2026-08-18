@@ -1,0 +1,10 @@
+{
+  "$schema": "desktop-config.schema.json",
+  "installDir": "/Users/maweiqiang/workspace/deepseek-harness",
+  "checkUpdatesOnStart": true,
+  "dshHome": "",
+  "port": 0,
+  "host": "127.0.0.1",
+  "githubRepo": "deepseek-ai/deepseek-harness",
+  "githubBranch": "master"
+}

@@ -1,0 +1,77 @@
+{
+  "name": "dsh-desktop-v2",
+  "productName": "DeepSeek Harness Desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DeepSeek Harness (dsh) 桌面端：Electron 主进程拉起打包的 dsh web 服务并托管其 Web UI，支持从 GitHub 对比版本号检查更新、拉取并重新打包",
+  "main": "main.js",
+  "author": "DeepSeek Harness Desktop",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "start:clean": "electron . --dsh-home=/tmp/dsh-desktop-v2-test-home",
+    "check-update": "node scripts/check-update.js",
+    "apply-update": "node scripts/apply-update.js",
+    "dist": "electron-builder --mac",
+    "dist:mac": "electron-builder --mac",
+    "dist:mac:zip": "electron-builder --mac zip",
+    "dist:dmg": "bash scripts/make-dmg.sh",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "dist:all": "electron-builder -mwl"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-web-frontend": "0.1.0-rc.7",
+    "semver": "^7.6.3"
+  },
+  "devDependencies": {
+    "electron": "43.4.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "ai.deepseek.harness.desktop",
+    "productName": "DeepSeek Harness Desktop",
+    "asar": false,
+    "npmRebuild": false,
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "lib/**/*",
+      "config/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "main.js"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.png",
+      "hardenedRuntime": false,
+      "identity": null
+    },
+    "dmg": {
+      "title": "DeepSeek Harness Desktop",
+      "sign": false
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development"
+    }
+  }
+}
