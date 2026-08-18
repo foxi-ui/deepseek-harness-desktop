@@ -1,0 +1,64 @@
+name: Build & Release
+
+# 推送 v* 标签（如 v0.1.0）时自动构建三个平台的安装包，
+# 并把产物挂到对应 GitHub Release 上供用户下载。
+# 注意："on" 加引号是为了兼容 YAML 1.1 解析器（on 会被当作布尔值）。
+"on":
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # 用内置 GITHUB_TOKEN 上传 release 资产，无需额外配置 PAT
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            script: dist:mac
+            artifact: mac
+          - os: windows-latest
+            script: dist:win
+            artifact: win
+          - os: ubuntu-latest
+            script: dist:linux
+            artifact: linux
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (${{ matrix.artifact }})
+        run: npm run ${{ matrix.script }}
+        env:
+          # electron-builder 在 CI 上可能需要该变量；
+          # 若已有缓存目录习惯可保持默认，无需改动。
+          ELECTRON_BUILDER_CACHE: ${{ runner.temp }}/electron-builder-cache
+
+      - name: List artifacts
+        run: ls -lh release/
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # 各平台只匹配自己生成的产物；未匹配到的文件会被跳过
+          files: |
+            release/*.dmg
+            release/*.zip
+            release/*.blockmap
+            release/*.exe
+            release/*.AppImage
+            release/*.yml
+          generate_release_notes: true
+          fail_on_unmatched_files: false
